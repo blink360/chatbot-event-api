@@ -1,12 +1,13 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { ConversationContext } from "./ai.types";
 import "dotenv/config";
 import { ConversationStateSchema } from "../../../lib/zod/schema/aiResponseSchema";
+
+import { ConversationContext } from "./ai.types";
 
 const ENTITY_EXTRACTION_PROMPT = `
 You are an AI assistant that extracts structured event data.
 
-Extract the following fields if present:
+Extract:
 - eventName
 - subheading
 - description
@@ -17,97 +18,114 @@ Extract the following fields if present:
 - roles
 
 Rules:
-- Return ONLY valid JSON
-- Do not include markdown
-- Preserve existing values if new values are absent
-- Dates must be ISO strings
+- return ONLY JSON
+- no markdown
+- no extra text
+- preserve existing values if missing
+- dates must be ISO strings
 `;
 
 const FOLLOW_UP_PROMPT = `
-You are an AI-powered conversational event assistant.
+You are a friendly event assistant.
 
-The following fields are still missing:
+Missing fields:
 {{missingFields}}
 
 Current state:
 {{state}}
 
-Ask a short natural follow-up question.
+Ask ONE short natural question.
+Do NOT behave like a form.
 `;
 
 const EVENT_SUMMARY_PROMPT = `
-You are an AI event assistant.
+You are an event assistant.
 
-Generate a concise confirmation summary for this event:
+Create a clean summary of this event:
 
 {{state}}
 
-End with asking the user if they want to finalize the event.
+End by asking if user wants to finalize.
 `;
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
 
 const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash",
+  model: "gemini-2.5-flash",
 });
 
-export const safeParseAIOutput = (text: string) => {
-  const cleaned = text
-    .replace(/```json/g, "")
-    .replace(/```/g, "")
-    .trim();
+const safeParseAIOutput = (text: string) => {
+  try {
+    const cleaned = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
 
-  const parsed = JSON.parse(cleaned);
+    const parsed = JSON.parse(cleaned);
 
-  return ConversationStateSchema.parse(parsed);
+    return ConversationStateSchema.parse(parsed);
+  } catch (err) {
+    return {};
+  }
 };
 
 const extractEventEntities = async (
   message: string,
   existingState: ConversationContext,
 ): Promise<Partial<ConversationContext>> => {
-  const prompt = `
+  try {
+    const prompt = `
 ${ENTITY_EXTRACTION_PROMPT}
 
-Existing event state:
+Existing state:
 ${JSON.stringify(existingState)}
 
 User message:
 ${message}
 `;
 
-  const result = await model.generateContent(prompt);
+    const result = await model.generateContent(prompt);
+    const response = result.response.text();
 
-  const response = result.response.text();
-
-  return JSON.parse(response);
+    return safeParseAIOutput(response);
+  } catch {
+    return {};
+  }
 };
 
 const generateFollowUpQuestion = async (
   missingFields: string[],
   state: ConversationContext,
 ): Promise<string> => {
-  const prompt = FOLLOW_UP_PROMPT.replace(
-    "{{missingFields}}",
-    missingFields.join(", "),
-  ).replace("{{state}}", JSON.stringify(state));
+  try {
+    const prompt = FOLLOW_UP_PROMPT.replace(
+      "{{missingFields}}",
+      missingFields.join(", "),
+    ).replace("{{state}}", JSON.stringify(state));
 
-  const result = await model.generateContent(prompt);
+    const result = await model.generateContent(prompt);
 
-  return result.response.text().trim();
+    return result.response.text().trim();
+  } catch {
+    return "What else should I know about your event?";
+  }
 };
 
 const generateEventSummary = async (
   state: ConversationContext,
 ): Promise<string> => {
-  const prompt = EVENT_SUMMARY_PROMPT.replace(
-    "{{state}}",
-    JSON.stringify(state),
-  );
+  try {
+    const prompt = EVENT_SUMMARY_PROMPT.replace(
+      "{{state}}",
+      JSON.stringify(state),
+    );
 
-  const result = await model.generateContent(prompt);
+    const result = await model.generateContent(prompt);
 
-  return result.response.text().trim();
+    return result.response.text().trim();
+  } catch {
+    return "Your event is ready. Do you want to finalize it?";
+  }
 };
 
 export default {

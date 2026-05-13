@@ -12,6 +12,7 @@ import {
   RefreshTokenDto,
   AuthenticatedRequest,
 } from "./auth.types.js";
+import "dotenv/config";
 
 export const register = async (
   req: Request<{}, {}, RegisterDto>,
