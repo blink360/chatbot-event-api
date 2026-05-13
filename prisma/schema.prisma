@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  ORGANIZER
+  VIEWER
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  VANISHED
+}
+
+model User {
+  id               String  @id @default(uuid())
+  email            String  @unique
+  passwordHash     String
+  refreshTokenHash String?
+  role             Role    @default(ORGANIZER)
+
+  events        Event[]
+  conversations Conversation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Event {
+  id             String      @id @default(uuid())
+  name           String
+  subheading     String?
+  description    String?
+  bannerImageUrl String?
+  timezone       String
+  status         EventStatus @default(DRAFT)
+  startDate      DateTime
+  endDate        DateTime
+  vanishDate     DateTime?
+
+  userId String
+
+  roles          Json?
+  conversationId String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Conversation {
+  id     String @id @default(uuid())
+  userId String
+
+  user User @relation(fields: [userId], references: [id])
+
+  language     String  @default("en")
+  currentState String?
+  context      Json?
+
+  messages Message[]
+
+  status String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Message {
+  id             String @id @default(uuid())
+  conversationId String
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+
+  sender   String
+  content  String
+  metadata Json?
+
+  createdAt DateTime @default(now())
+}
