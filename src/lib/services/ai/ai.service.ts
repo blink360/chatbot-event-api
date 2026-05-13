@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { ConversationContext } from "./ai.types";
 import "dotenv/config";
-import { ConversationStateSchema } from "src/lib/zod/schema/aiResponseSchema";
+import { ConversationStateSchema } from "../../../lib/zod/schema/aiResponseSchema";
 
 const ENTITY_EXTRACTION_PROMPT = `
 You are an AI assistant that extracts structured event data.

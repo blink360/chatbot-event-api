@@ -1,8 +1,8 @@
 import { Prisma } from "@prisma/client";
 
-import { prisma } from "src/lib/db/prisma/index.js";
+import { prisma } from "../../lib/db/prisma/index";
 
-import aiService from "../../lib/services/ai/ai.service.js";
+import aiService from "../../lib/services/ai/ai.service";
 
 import {
   ChatResponse,
@@ -10,7 +10,7 @@ import {
   ChatSuggestion,
 } from "./chat.types.js";
 
-import { createEventFromConversation } from "../event/event.service.js";
+import { createEventFromConversation } from "../event/event.service";
 
 const REQUIRED_FIELDS = [
   "eventName",

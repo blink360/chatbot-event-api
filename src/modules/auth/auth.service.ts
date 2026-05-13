@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-import { prisma } from "../../lib/db/prisma/index.js";
+import { prisma } from "../../lib/db/prisma/index";
 
 import {
   JwtPayload,

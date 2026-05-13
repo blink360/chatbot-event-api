@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
-import { processMessage } from "./chat.service.js";
-import { AuthenticatedRequest } from "../auth/auth.types.js";
+import { processMessage } from "./chat.service";
+import { AuthenticatedRequest } from "../auth/auth.types";
 
 
 export const sendMessage = async (

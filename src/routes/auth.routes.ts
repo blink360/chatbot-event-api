@@ -11,9 +11,9 @@ import {
   login,
   refreshToken,
   logout,
-} from "../modules/auth/auth.controller.js";
+} from "../modules/auth/auth.controller";
 
-import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
 

@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { sendMessage } from "../modules/chat/chat.controller.js";
-import { authMiddleware } from "../middlewares/auth.middleware.js";
-import { validate } from "src/middlewares/validation.middleware.js";
-import { chatSchema } from "src/lib/zod/schema/chatSchema.js";
+import { sendMessage } from "../modules/chat/chat.controller";
+import { authMiddleware } from "../middlewares/auth.middleware";
+import { validate } from "../middlewares/validation.middleware";
+import { chatSchema } from "../lib/zod/schema/chatSchema";
 
 const router = Router();
 router.post(

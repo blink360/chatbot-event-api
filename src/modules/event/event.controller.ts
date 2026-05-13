@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
-import { getEvents } from "./event.service.js";
-import { AuthenticatedRequest } from "../auth/auth.types.js";
+import { getEvents } from "./event.service";
+import { AuthenticatedRequest } from "../auth/auth.types";
 
 export const listEvents = async (
   req: AuthenticatedRequest,

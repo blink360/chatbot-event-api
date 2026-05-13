@@ -4,7 +4,7 @@ import {
   login as loginService,
   refreshToken as refreshTokenService,
   logout as logoutService,
-} from "./auth.service.js";
+} from "./auth.service";
 
 import {
   LoginDto,

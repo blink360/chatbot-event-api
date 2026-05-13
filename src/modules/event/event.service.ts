@@ -1,4 +1,4 @@
-import { prisma } from "src/lib/db/prisma/index.js";
+import { prisma } from "../../lib/db/prisma/index";
 import { ConversationState } from "../chat/chat.types";
 
 export const createEventFromConversation = async (
