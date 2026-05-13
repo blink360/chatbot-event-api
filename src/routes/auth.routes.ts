@@ -19,7 +19,7 @@ const router = Router();
 
 router.post("/register", validate(registerSchema as any), register);
 router.post("/login", validate(loginSchema as any), login);
-router.post("/refresh", validate(refreshSchema as any), refreshToken);
+router.post("/refresh", refreshToken);
 router.post("/logout", authMiddleware, logout as any);
 
 export default router;

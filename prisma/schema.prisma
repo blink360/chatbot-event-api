@@ -45,9 +45,7 @@ model Event {
   startDate      DateTime
   endDate        DateTime
   vanishDate     DateTime?
-
   userId String
-
   roles          Json?
   conversationId String   @unique
   createdAt      DateTime @default(now())

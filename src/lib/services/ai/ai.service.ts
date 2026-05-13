@@ -1,52 +1,18 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import "dotenv/config";
-import { ConversationStateSchema } from "../../../lib/zod/schema/aiResponseSchema";
 
-import { ConversationContext } from "./ai.types";
-
-const ENTITY_EXTRACTION_PROMPT = `
-You are an AI assistant that extracts structured event data.
-
-Extract:
-- eventName
-- subheading
-- description
-- timezone
-- startDate
-- endDate
-- vanishDate
-- roles
-
-Rules:
-- return ONLY JSON
-- no markdown
-- no extra text
-- preserve existing values if missing
-- dates must be ISO strings
-`;
-
-const FOLLOW_UP_PROMPT = `
-You are a friendly event assistant.
-
-Missing fields:
-{{missingFields}}
-
-Current state:
-{{state}}
-
-Ask ONE short natural question.
-Do NOT behave like a form.
-`;
-
-const EVENT_SUMMARY_PROMPT = `
-You are an event assistant.
-
-Create a clean summary of this event:
-
-{{state}}
-
-End by asking if user wants to finalize.
-`;
+export type EventState = {
+  eventName: string | null;
+  subheading: string | null;
+  description: string | null;
+  timezone: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  vanishDate: string | null;
+  roles: string[];
+  bannerImage: string | null;
+  confidence: number;
+};
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
 
@@ -54,82 +20,69 @@ const model = genAI.getGenerativeModel({
   model: "gemini-2.5-flash",
 });
 
-const safeParseAIOutput = (text: string) => {
-  try {
-    const cleaned = text
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
+const EVENT_BUILDER_PROMPT = `
+You are an AI event planning assistant.
 
-    const parsed = JSON.parse(cleaned);
+Your job is to understand the FULL conversation and reconstruct the best possible event.
 
-    return ConversationStateSchema.parse(parsed);
-  } catch (err) {
-    return {};
-  }
-};
+Rules:
+- Only infer values if they are explicitly implied in the user's message
+- DO NOT invent any field values
+- If not explicitly mentioned or strongly implied, set field to null
+- NEVER generate marketing content or event descriptions
 
-const extractEventEntities = async (
-  message: string,
-  existingState: ConversationContext,
-): Promise<Partial<ConversationContext>> => {
-  try {
-    const prompt = `
-${ENTITY_EXTRACTION_PROMPT}
-
-Existing state:
-${JSON.stringify(existingState)}
-
-User message:
-${message}
+Output schema:
+{
+  eventName: string | null,
+  subheading: string | null,
+  description: string | null,
+  timezone: string | null,
+  startDate: string | null,
+  endDate: string | null,
+  vanishDate: string | null,
+  roles: string[],
+  bannerImage: string | null,
+}
 `;
 
-    const result = await model.generateContent(prompt);
-    const response = result.response.text();
+const FOLLOW_UP_PROMPT = `
+You are a conversational event assistant.
 
-    return safeParseAIOutput(response);
-  } catch {
-    return {};
-  }
+Given the current event state, generate a natural human-like message.
+
+Rules:
+- Do NOT be robotic
+- If any values are null or missing ask about it to the user
+- Ask only ONE natural question OR suggest improvement
+- If event is complete, ask for confirmation
+
+Event state:
+{{state}}
+`;
+
+export const buildEventState = async (messages: any[]): Promise<EventState> => {
+  const prompt = `
+${EVENT_BUILDER_PROMPT}
+
+Conversation:
+${JSON.stringify(messages)}
+`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response
+    .text()
+    .replace(/```json|```/g, "")
+    .trim();
+
+  return JSON.parse(text);
 };
 
-const generateFollowUpQuestion = async (
-  missingFields: string[],
-  state: ConversationContext,
+export const generateAssistantMessage = async (
+  state: EventState,
 ): Promise<string> => {
-  try {
-    const prompt = FOLLOW_UP_PROMPT.replace(
-      "{{missingFields}}",
-      missingFields.join(", "),
-    ).replace("{{state}}", JSON.stringify(state));
+  const prompt = FOLLOW_UP_PROMPT.replace("{{state}}", JSON.stringify(state));
 
-    const result = await model.generateContent(prompt);
+  const result = await model.generateContent(prompt);
 
-    return result.response.text().trim();
-  } catch {
-    return "What else should I know about your event?";
-  }
-};
-
-const generateEventSummary = async (
-  state: ConversationContext,
-): Promise<string> => {
-  try {
-    const prompt = EVENT_SUMMARY_PROMPT.replace(
-      "{{state}}",
-      JSON.stringify(state),
-    );
-
-    const result = await model.generateContent(prompt);
-
-    return result.response.text().trim();
-  } catch {
-    return "Your event is ready. Do you want to finalize it?";
-  }
-};
-
-export default {
-  extractEventEntities,
-  generateFollowUpQuestion,
-  generateEventSummary,
+  return result.response.text().trim();
 };

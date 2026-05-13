@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes";
 import chatRoutes from "./routes/chat.routes";
 import eventRoutes from "./routes/event.routes";
 import { apiLimiter, authLimiter } from "./middlewares/rateLimit.middleware";
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser())
 app.use(apiLimiter);
 app.use("/auth", authLimiter, authRoutes);
 app.use("/chat", chatRoutes);

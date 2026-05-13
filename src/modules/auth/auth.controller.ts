@@ -34,7 +34,16 @@ export const login = async (
 ): Promise<void> => {
   try {
     const result = await loginService(req.body);
-    res.status(200).json(result);
+    res
+      .cookie("refreshToken", result.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/auth/refresh",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .status(200)
+      .json(result);
   } catch (error) {
     next(error);
   }
@@ -46,8 +55,17 @@ export const refreshToken = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const result = await refreshTokenService(req.body.refreshToken);
-    res.status(200).json(result);
+    const result = await refreshTokenService(req.cookies.refreshToken);
+    res
+      .cookie("refreshToken", result.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/auth/refresh",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .status(200)
+      .json(result);
   } catch (error) {
     next(error);
   }
