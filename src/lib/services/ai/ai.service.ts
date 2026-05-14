@@ -28,6 +28,7 @@ Your job is to understand the FULL conversation and reconstruct the best possibl
 Rules:
 - Only infer values if they are explicitly implied in the user's message
 - DO NOT invent any field values
+- For the date fields infer from the day and time in the sentence and store it as YYYY-MM-DD hh:mm format in the json.
 - If not explicitly mentioned or strongly implied, set field to null
 - NEVER generate marketing content or event descriptions
 

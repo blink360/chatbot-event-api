@@ -4,6 +4,7 @@ import {
   login as loginService,
   refreshToken as refreshTokenService,
   logout as logoutService,
+  deleteAccountService,
 } from "./auth.service";
 
 import {
@@ -78,6 +79,27 @@ export const logout = async (
 ): Promise<void> => {
   try {
     const result = await logoutService(req.user.sub);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteAccount = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const result = await deleteAccountService(req.user.sub);
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      path: "/auth/refresh",
+    });
+
     res.status(200).json(result);
   } catch (error) {
     next(error);

@@ -170,3 +170,37 @@ const storeRefreshToken = async (
     },
   });
 };
+
+export const deleteAccountService = async (userId: string) => {
+  await prisma.$transaction([
+    prisma.message.deleteMany({
+      where: {
+        conversation: {
+          userId,
+        },
+      },
+    }),
+
+    prisma.conversation.deleteMany({
+      where: {
+        userId,
+      },
+    }),
+
+    prisma.event.deleteMany({
+      where: {
+        userId,
+      },
+    }),
+
+    prisma.user.delete({
+      where: {
+        id: userId,
+      },
+    }),
+  ]);
+
+  return {
+    message: "Account deleted successfully",
+  };
+};
