@@ -5,6 +5,7 @@ import { EventState } from "../../lib/services/ai/ai.service";
 export const createEventFromState = async (
   userId: string,
   state: EventState,
+  conversationId: string
 ) => {
   if (
     !state.eventName ||
@@ -28,10 +29,10 @@ export const createEventFromState = async (
       bannerImageUrl: state.bannerImage ?? null,
       userId,
       status: "DRAFT",
+      conversationId,
     },
   });
 };
-
 
 export const getEvents = async (userId: string) => {
   return prisma.event.findMany({
@@ -65,7 +66,6 @@ export const publishEvent = async (userId: string, eventId: string) => {
     },
   });
 };
-
 
 export const deleteEvent = async (userId: string, eventId: string) => {
   return prisma.event.deleteMany({
