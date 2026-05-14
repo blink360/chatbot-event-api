@@ -1,5 +1,4 @@
 import { prisma } from "../../lib/db/prisma/index";
-import { Prisma } from "@prisma/client";
 import { EventState } from "../../lib/services/ai/ai.service";
 
 export const createEventFromState = async (
@@ -44,7 +43,7 @@ export const getEvents = async (userId: string) => {
 export const updateEvent = async (
   userId: string,
   eventId: string,
-  data: Prisma.EventUpdateInput,
+  data: any,
 ) => {
   return prisma.event.updateMany({
     where: {

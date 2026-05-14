@@ -35,7 +35,7 @@ export const processMessage = async (
   });
 
   const messages = conversation.messages
-    .map((m) => ({
+    .map((m: { sender: string; content: string }) => ({
       role: m.sender,
       content: m.content,
     }))
