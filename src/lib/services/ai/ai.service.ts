@@ -17,7 +17,7 @@ export type EventState = {
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
 
 const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
+  model: process.env.GEMINI_MODEL as string,
 });
 
 const EVENT_BUILDER_PROMPT = `
