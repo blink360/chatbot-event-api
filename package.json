@@ -4,7 +4,6 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "clean": "rm -rf dist",
-
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
@@ -12,12 +11,10 @@
     "prisma:push": "prisma db push",
     "prisma:seed-events": "ts-node prisma/seed.ts",
     "db:reset": "prisma migrate reset",
-
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
-
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -41,6 +38,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.8.0",
     "@types/pg": "^8.20.0",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
