@@ -6,7 +6,7 @@ import authRoutes from "./routes/auth.routes";
 import chatRoutes from "./routes/chat.routes";
 import eventRoutes from "./routes/event.routes";
 import { apiLimiter, authLimiter } from "./middlewares/rateLimit.middleware";
-import cookieParser from 'cookie-parser';
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
@@ -14,16 +14,11 @@ const app = express();
 
 setupSwagger(app);
 
-app.use(
-  cors({
-    origin: process.env.FE_URL,
-    credentials: true,
-  }),
-);
+app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser())
+app.use(cookieParser());
 app.use(apiLimiter);
 app.use("/auth", authLimiter, authRoutes);
 app.use("/chat", chatRoutes);
