@@ -1,6 +1,6 @@
 import { prisma } from "../src/lib/db/prisma/index";
 
-const userId = "2cbda0b8-77c2-44c8-b96e-f7c6aa8d0d27";
+const userId = "6711a03f-7d10-41f5-ada2-57259f53cc05";
 
 const addDays = (days: number) => {
   const date = new Date();
