@@ -43,8 +43,6 @@ const events = [
 ];
 
 async function seed() {
-  console.log("Seeding events...");
-
   for (const event of events) {
     await prisma.event.create({
       data: {
@@ -54,13 +52,10 @@ async function seed() {
       },
     });
   }
-
-  console.log("Done seeding events.");
 }
 
 seed()
   .catch((e) => {
-    console.error(e);
     process.exit(1);
   })
   .finally(async () => {
